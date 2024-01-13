@@ -41,6 +41,7 @@ public class Uzytkownicy implements Serializable {
 	private String nazwisko;
 
 	private int telefon;
+	
 
 	//bi-directional many-to-one association to Pokoje
 	@OneToMany(mappedBy="uzytkownicy")
