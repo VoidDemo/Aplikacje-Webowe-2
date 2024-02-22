@@ -3,8 +3,10 @@ package hotel.jsf.dao;
 import hotel.jsf.entity.Uzytkownicy;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +26,14 @@ public class UserDAO {
 		em.merge(user);
 	}
 	
-	public void delete(Uzytkownicy user) {
-		em.remove(user);
+	public void delete(int id) {
+		Uzytkownicy user = em.find(Uzytkownicy.class, id);
+		if (user != null) {
+            em.remove(user);
+        } 
 	}
 	
-	public Uzytkownicy get(Object id) {
+	public Uzytkownicy get(int id) {
 		return em.find(Uzytkownicy.class, id);
 	}
 	
@@ -56,25 +61,22 @@ public class UserDAO {
 	    String orderby = "ORDER BY u.idUzytkownika ASC";
 
 	    // Example search for surname
-	    String nazwisko = (String) searchParams.get("nazwisko");
+	    String nazwisko = (String) searchParams.get("surname");
 	    if (nazwisko != null) {
 	        if (where.isEmpty()) {
 	            where = "WHERE ";
 	        } else {
 	            where += "AND ";
 	        }
-	        where += "u.nazwisko LIKE :nazwisko ";
+	        where += "u.nazwisko LIKE :surname ";
 	    }
-
-	    // Add other parameters based on search criteria
-	    // e.g., "u.email LIKE :email" or "u.telefon = :telefon"
 
 	    // 2. Create query object
 	    Query query = em.createQuery(select + from + where + orderby);
 
 	    // 3. Set configured parameters
 	    if (nazwisko != null) {
-	        query.setParameter("nazwisko", nazwisko + "%");
+	        query.setParameter("surname", nazwisko + "%");
 	    }
 
 	    // Set other parameters based on search criteria
@@ -91,31 +93,35 @@ public class UserDAO {
 	
 	public Uzytkownicy getUserFromDatabase(String login, String pass) {
 		
-		Uzytkownicy user = null;
-		
-		if (login.equals(user.getEmail()) && pass.equals(user.getHaslo())) {
-			user.setEmail(login);
-			user.setHaslo(pass);
-		}
-
-		return user;
+		try {
+	        TypedQuery<Uzytkownicy> query = em.createQuery(
+	                "SELECT u FROM Uzytkownicy u WHERE u.email = :email AND u.haslo = :haslo", Uzytkownicy.class);
+	        query.setParameter("email", login);
+	        query.setParameter("haslo", pass);
+	        return query.getSingleResult();
+	    } catch (NoResultException e) {
+	        return null;
+	    }
 	}
 	
 	public List<String> getUserRolesFromDatabase(Uzytkownicy user) {
-		
-		ArrayList<String> roles = new ArrayList<String>();
-		
-		if (user.getRola().equals(1)) {
-			roles.add("admin");
-		}
-		if (user.getRola().equals(2)) {
-			roles.add("manager");
-		}
-		if (user.getRola().equals(3)) {
-			roles.add("admin");
-		}
-		
-		return roles;
+	    List<String> roles = new ArrayList<>();
+
+	    if (user.getRola() != null) { 
+	        int roleId = user.getRola().getIdRoli(); 
+
+	        if (roleId == 1) {
+	            roles.add("admin");
+	        } else if (roleId == 2) {
+	            roles.add("moderator");
+	        } else if (roleId == 3) {
+	            roles.add("uzytkownik");
+	        }
+	    }    
+	    return roles;
+	    
 	}
+	
+	
 	
 }

@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/templates/main_template.xhtml">
+    <ui:define name="title">Strona Moderatora</ui:define>
+	
+	<ui:define name="content-top">
+	
+		
+		    <div class="account-header">
+            	<h1>Moje konto</h1>
+            	<hr />
+        	</div>
+	        <div class="account-content" rendered="#{not empty reservationList.userReservations}">
+			    <p:dataTable id="reservation-table" var="r" value="#{reservationList.lazyModel}"
+              		lazy="true" paginator="true" rows="5"
+              		paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+              		rowsPerPageTemplate="1,5,10" >
+              		<p:ajax event="page" update="reservation-table" />
+			        <p:column>
+			            <f:facet name="header">ID rezerwacji</f:facet>
+			            <h:outputText value="#{r.id}" />
+			        </p:column>
+			        <p:column>
+			            <f:facet name="header">Typ pokoju</f:facet>
+			            <h:outputText value="#{r.pokoje.typPokoju.nazwa}" />
+			        </p:column>
+			        <p:column>
+			            <f:facet name="header">Liczba osób</f:facet>
+			            <h:outputText value="#{r.pokoje.liczbaOsob}" />
+			        </p:column>
+			        <p:column>
+			            <f:facet name="header">Data od</f:facet>
+			            <h:outputText value="#{r.dataRozpoczecia}" />
+			        </p:column>
+			        <p:column>
+			            <f:facet name="header">Data do</f:facet>
+			            <h:outputText value="#{r.dataZakonczenia}" />
+			        </p:column>
+			        <p:column>
+			            <f:facet name="header">Koszt całkowity</f:facet>
+			            <h:outputText value="#{r.koszt}" />
+			        </p:column>
+			    </p:dataTable>
+		</div>
+
+	        
+		
+	</ui:define>
+		
+	<ui:define name="content-bottom">
+	
+		<div class="account-bottom">
+		    <legend>MODERATOR: zarządzanie pokojami</legend>
+		    <hr/>
+		    <br/>
+		    <h:form>
+			    <h:commandButton value="+Dodaj pokój" action="#{roomList.addRoom()}" styleClass="button-small button-10"/>
+			</h:form>
+		    <br/><br/>
+			<h:form id="room-table">
+			    <p:dataTable value="#{roomList.roomsByModerator}" var="room" styleClass="pure-table pure-table-bordered" rowClasses="pure-table-odd, pure-table-even" >
+				    <p:column headerText="ID pokoju">
+				        #{room.idPokoju}
+				    </p:column>
+				    <p:column headerText="Typ pokoju">
+				        #{room.typPokoju.nazwa}
+				    </p:column>
+				    <p:column headerText="Liczba osób">
+				        #{room.liczbaOsob}
+				    </p:column>
+				    <p:column headerText="Liczba łazienek">
+				        #{room.liczbaLazienek}
+				    </p:column>
+				    <p:column headerText="Koszt za dobę">
+				        #{room.cenaZaDobe} zł
+				    </p:column>
+				    <p:column headerText="Telewizor">
+				        #{room.telewizor == 't' ? 'tak' : 'nie'}
+				    </p:column>
+				    <p:column headerText="Klimatyzacja">
+				        #{room.klimatyzacja == 't' ? 'tak' : 'nie'}
+				    </p:column>
+				    <p:column headerText="Kuchnia">
+				        #{room.kuchnia == 't' ? 'tak' : 'nie'}
+				    </p:column>
+				    <p:column headerText="Opcje">
+				        <p:commandButton value="Edytuj" action="#{roomList.editRoom(room)}" styleClass="button-small button-10" update=":room-table"/>
+				        <p:commandButton value="Usuń" action="#{roomList.deleteRoom(room)}" styleClass="button-10-red" onclick="return confirm('Czy na pewno chcesz usunąć ten pokój?');" update=":room-table"/>
+				    </p:column>
+				</p:dataTable>
+		    </h:form>
+		</div>
+	
+	</ui:define>
+	
+</ui:composition>
+</html>

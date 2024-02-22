@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+	<ui:composition template="/templates/main_template.xhtml">
+    <ui:define name="title">Rejestracja</ui:define>
+	
+	<ui:define name="header">
+		<div class="home-menu pure-menu pure-menu-horizontal pure-menu-fixed">
+	    	<h:link value="Strona główna" outcome="/pages/index" styleClass="pure-menu-heading"/><br/>
+		</div>
+	</ui:define>
+	
+	<ui:define name="content-top">
+	<div class="login">
+		<h:form styleClass="pure-form pure-form-aligned bottom-margin">
+		    <fieldset>
+		        <legend>Rejestracja użytkownika</legend>
+		        
+		        <div class="pure-control-group">
+		            <h:outputLabel for="name" value="Imię: " />
+		            <h:inputText id="name" value="#{register.name}" required="true" requiredMessage="Imię jest wymagane." />
+		        </div>
+		
+		        <div class="pure-control-group">
+		            <h:outputLabel for="surname" value="Nazwisko: " />
+		            <h:inputText id="surname" value="#{register.surname}" required="true" requiredMessage="Nazwisko jest wymagane." />
+		        </div>
+		
+		        <div class="pure-control-group">
+		            <h:outputLabel for="email" value="Email: " />
+		            <h:inputText id="email" value="#{register.email}" required="true" validatorMessage="Nieprawidłowy format email.">
+		                <f:validateRegex pattern="^[\w\.-]+@[\w\.-]+\.\w{2,4}$" />
+		            </h:inputText>
+		        </div>
+		
+		        <div class="pure-control-group">
+		            <h:outputLabel for="phone" value="Nr telefonu: " />
+		            <h:inputText id="phone" value="#{register.phone}" maxlength="9" required="true" requiredMessage="Nr telefonu jest wymagany." />
+		        </div>
+		
+		        <div class="pure-control-group">
+		            <h:outputLabel for="pass1" value="Hasło: " />
+		            <h:inputSecret id="pass1" value="#{register.pass1}" required="true" requiredMessage="Hasło jest wymagane." />
+		        </div>
+		
+		        <div class="pure-control-group">
+		            <h:outputLabel for="pass2" value="Powtórz hasło: " />
+		            <h:inputSecret id="pass2" value="#{register.pass2}" required="true" requiredMessage="Potwierdzenie hasła jest wymagane." />
+		        </div>
+		
+		        <div class="pure-controls">
+		            <h:commandButton value="Zarejestruj" action="#{register.register}" styleClass="pure-button pure-button-primary"/>
+		        </div>
+		    </fieldset>
+		    <h:messages styleClass="msg"/>
+		</h:form>
+	</div>	
+	</ui:define>
+	
+	<ui:define name="content-bottom"></ui:define>
+	
+	</ui:composition>
+</html>

@@ -5,9 +5,17 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Root;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.SortOrder;
 
 @Stateless
 public class ReservationDAO {
@@ -15,7 +23,7 @@ public class ReservationDAO {
     @PersistenceContext
     EntityManager em;
     
-    public void create(Rezerwacje reservation) {
+    public void createReservation(Rezerwacje reservation) {
         em.persist(reservation);
     }
     
@@ -31,61 +39,46 @@ public class ReservationDAO {
         return em.find(Rezerwacje.class, id);
     }
     
-    public List<Rezerwacje> getFullList() {
-        List<Rezerwacje> list = null;
-
-        Query query = em.createQuery("SELECT r FROM Rezerwacje r");
-
-        try {
-            list = query.getResultList();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    
+    public List<Rezerwacje> getReservationsForUser(int userId) {
+    	List<Rezerwacje> list = null;
+        list = em.createQuery("SELECT r FROM Rezerwacje r WHERE r.uzytkownicy.id = :userId", Rezerwacje.class)
+                 .setParameter("userId", userId)
+                 .getResultList();
         return list;
     }
     
-    public List<Rezerwacje> getList(Map<String, Object> searchParams) {
-        List<Rezerwacje> list = null;
-
-        // 1. Build query string with parameters
-        String select = "SELECT r ";
-        String from = "FROM Rezerwacje r ";
-        String where = "";
-        String orderby = "ORDER BY r.dataRozpoczecia ASC";
-
-        // Example search for start date
-        Date dataRozpoczecia = (Date) searchParams.get("dataRozpoczecia");
-        if (dataRozpoczecia != null) {
-            if (where.isEmpty()) {
-                where = "WHERE ";
-            } else {
-                where += "AND ";
-            }
-            where += "r.dataRozpoczecia >= :dataRozpoczecia ";
-        }
-
-        // Add other parameters based on search criteria
-        // e.g., "r.koszt <= :koszt" or "r.uzytkownicy.id = :userId"
-
-        // 2. Create query object
-        Query query = em.createQuery(select + from + where + orderby);
-
-        // 3. Set configured parameters
-        if (dataRozpoczecia != null) {
-            query.setParameter("dataRozpoczecia", dataRozpoczecia);
-        }
-
-        // Set other parameters based on search criteria
-
-        // 4. Execute query and retrieve list of Rezerwacje objects
-        try {
-            list = query.getResultList();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
+    public boolean checkReservationAvailability(int roomId, Date startDate, Date endDate) {
+        List<Rezerwacje> existingReservations = em.createQuery("SELECT r FROM Rezerwacje r WHERE r.pokoje.id = :roomId AND NOT (r.dataZakonczenia < :startDate OR r.dataRozpoczecia > :endDate)", Rezerwacje.class)
+                .setParameter("roomId", roomId)
+                .setParameter("startDate", startDate)
+                .setParameter("endDate", endDate)
+                .getResultList();
+        return existingReservations.isEmpty();
     }
+    
+    public List<Rezerwacje> findReservationsLazy(int userId, int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Rezerwacje> cq = cb.createQuery(Rezerwacje.class);
+        Root<Rezerwacje> reservation = cq.from(Rezerwacje.class);
+        cq.where(cb.equal(reservation.get("uzytkownicy").get("id"), userId));
+        if (sortField != null) {
+            Path<Object> sortPath = reservation.get(sortField);
+            cq.orderBy(sortOrder == SortOrder.DESCENDING ? cb.desc(sortPath) : cb.asc(sortPath));
+        }
+        TypedQuery<Rezerwacje> query = em.createQuery(cq);
+        query.setFirstResult(first);
+        query.setMaxResults(pageSize);
+        return query.getResultList();
+    }
+
+    public int getReservationsCount(int userId) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Rezerwacje> reservation = cq.from(Rezerwacje.class);
+        cq.select(cb.count(reservation)).where(cb.equal(reservation.get("uzytkownicy").get("id"), userId));
+        return em.createQuery(cq).getSingleResult().intValue();
+    }
+
     
 }

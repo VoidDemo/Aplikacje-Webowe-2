@@ -1,12 +1,26 @@
 package hotel.jsf.dao;
 
+
 import hotel.jsf.entity.Pokoje;
+import hotel.jsf.entity.Rezerwacje;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @Stateless
 public class RoomDAO {
@@ -23,10 +37,10 @@ public class RoomDAO {
     }
     
     public void delete(Pokoje room) {
-        em.remove(room);
+        em.remove(em.merge(room));
     }
     
-    public Pokoje get(Object id) {
+    public Pokoje getRoom(Object id) {
         return em.find(Pokoje.class, id);
     }
     
@@ -44,47 +58,53 @@ public class RoomDAO {
         return list;
     }
     
-    public List<Pokoje> getList(Map<String, Object> searchParams) {
-        List<Pokoje> list = null;
-
-        // 1. Build query string with parameters
-        String select = "SELECT p ";
-        String from = "FROM Pokoje p ";
-        String where = "";
-        String orderby = "ORDER BY p.idPokoju ASC";
-
-        // Example search for room type
-        String typPokoju = (String) searchParams.get("typPokoju");
-        if (typPokoju != null) {
-            if (where.isEmpty()) {
-                where = "WHERE ";
-            } else {
-                where += "AND ";
-            }
-            where += "p.typPokoju.nazwaTypu LIKE :typPokoju ";
-        }
-
-        // Add other parameters based on search criteria
-        // e.g., "p.cenaZaDobe = :cenaZaDobe" or "p.liczbaOsob = :liczbaOsob"
-
-        // 2. Create query object
-        Query query = em.createQuery(select + from + where + orderby);
-
-        // 3. Set configured parameters
-        if (typPokoju != null) {
-            query.setParameter("typPokoju", typPokoju + "%");
-        }
-
-        // Set other parameters based on search criteria
-
-        // 4. Execute query and retrieve list of Pokoje objects
-        try {
-            list = query.getResultList();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+    public List<Pokoje> getSortedRooms(String sortCriteria) {
+        String queryStr = "SELECT p FROM Pokoje p";
+        if ("highest".equals(sortCriteria)) {
+            queryStr += " ORDER BY p.cenaZaDobe DESC";
+        } else if ("lowest".equals(sortCriteria)) {
+            queryStr += " ORDER BY p.cenaZaDobe ASC";
+        } // Domyślne sortowanie można dodać tutaj
+        
+        Query query = em.createQuery(queryStr);
+        return query.getResultList();
+    }
+    
+   
+    
+    public List<Pokoje> getRoomsByModeratorId(int userId) {
+    	List<Pokoje> list = null;
+        list = em.createQuery("SELECT p FROM Pokoje p WHERE p.uzytkownicy.idUzytkownika = :userId", Pokoje.class)
+                 .setParameter("userId", userId)
+                 .getResultList();
         return list;
     }
     
+    public List<Pokoje> findRoomsPaginated(int first, int pageSize, String sortField, String sortOrder) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Pokoje> cq = cb.createQuery(Pokoje.class);
+        Root<Pokoje> root = cq.from(Pokoje.class);
+
+     // Dodanie sortowania, jeśli zostało określone
+        if (sortField != null && sortOrder != null) {
+            Order order = sortOrder.equals("ASC") ? cb.asc(root.get(sortField)) : cb.desc(root.get(sortField));
+            cq.orderBy(order);
+        }
+
+        TypedQuery<Pokoje> query = em.createQuery(cq)
+                                     .setFirstResult(first)
+                                     .setMaxResults(pageSize);
+        return query.getResultList();
+    }
+
+    public int countFilteredRooms() {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<Pokoje> root = query.from(Pokoje.class);
+        
+        query.select(cb.count(root));
+        return em.createQuery(query).getSingleResult().intValue();
+    }
+	
+
 }

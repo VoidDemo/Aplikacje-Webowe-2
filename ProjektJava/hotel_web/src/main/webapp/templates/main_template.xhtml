@@ -1,0 +1,136 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+	  xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title><ui:insert name="title">Default Title</ui:insert></title>
+	<h:outputStylesheet name="css/style.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></link>
+    <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"></link>
+    <link rel="shortcut icon" type="image/png" href="#{resource['images/icons8-bed-50.png']}" />
+</h:head>
+<body>
+	<ui:insert name="header">
+        	<ui:include src="header.xhtml" />
+    </ui:insert>
+    
+    
+    
+    <div id="content-top">
+        <ui:insert name="content-top">
+        
+        	<div class="sorting-list">
+	            
+	           <h:form>
+				    <a class="little-box">Sortuj według:</a>                
+				    <h:commandButton value="Potwierdź" action="#{roomList.onConfirmSort}" update=":dataTableForm:room-table" styleClass="button-3"/>
+				    <br />
+				    Cena za dobe:
+				    <h:selectOneMenu value="#{roomList.selectedSortOption}">
+				        <f:selectItem itemValue="default" itemLabel="Wybierz..." />
+				        <f:selectItem itemValue="highest" itemLabel="Najwyższej" />
+				        <f:selectItem itemValue="lowest" itemLabel="Najniższej" />
+				    </h:selectOneMenu>
+				</h:form>
+	            <hr />
+	            <h:form >
+	                <a class="little-box">Filtruj według:</a>
+	                <h:commandButton value="Potwierdź" styleClass="button-3"/>
+	                <br />
+	                Typ pokoju:
+	               <h:selectOneMenu value="#{roomList.typPokojuId}">
+	               		<f:selectItem itemValue="null" itemLabel="Wybierz..." noSelectionOption="true"/>
+					    <f:selectItem itemValue="1" itemLabel="apartament" />
+					    <f:selectItem itemValue="2" itemLabel="kawalerka" />
+					    <f:selectItem itemValue="3" itemLabel="2-osobowy" />
+					    <f:selectItem itemValue="4" itemLabel="3-osobowy" />
+					    <f:selectItem itemValue="5" itemLabel="studio" />
+					    <f:selectItem itemValue="6" itemLabel="duplex" />
+					</h:selectOneMenu>
+					Liczba osób:
+					<h:selectOneMenu value="#{roomList.liczbaOsob}">
+						<f:selectItem itemValue="null" itemLabel="Wybierz..." noSelectionOption="true"/>
+					    <f:selectItem itemValue="1" itemLabel="1" />
+					    <f:selectItem itemValue="2" itemLabel="2" />
+					    <f:selectItem itemValue="3" itemLabel="3" />
+					    <f:selectItem itemValue="4" itemLabel="4" /> 
+					</h:selectOneMenu>
+	                <br />
+	                Kuchnia <h:selectBooleanCheckbox value="#{roomList.kuchnia}" />
+	                Klimatyzacja <h:selectBooleanCheckbox value="#{roomList.klimatyzacja}" />
+	                Telewizor <h:selectBooleanCheckbox  value="#{roomList.telewizor}" />
+	            </h:form>
+	        </div>
+        
+        </ui:insert>
+    </div>
+    <div id="content-bottom">
+        <ui:insert name="content-bottom">
+	        <div class="content-wrapper">
+            <button onclick="topFunction()" id="myBtn" title="Go to top"><i class="fa fa-angle-up"></i></button>
+            <div class="table-container">
+			<h:form>
+	            <p:dataTable id="room-table" var="r" value="#{roomList.lazyModel}" lazy="true"
+                 paginator="true" rows="10"
+                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                 rowsPerPageTemplate="5,10,15"
+                 paginatorPosition="top">
+			                 
+			        <p:ajax event="page" update="room-table" />
+				    <p:column>
+				        <div class="content">
+				            <p class="first-line">Pokój #{r.liczbaOsob} osobowy typu #{r.typPokoju.nazwa}</p>
+				            <div class="infoBox-content">
+				                <div class="left"></div>
+				                <div class="middle">
+				                    <b>Wyposażenie:</b>
+				                    <ul>
+				                        <li>Łazienki: #{r.liczbaLazienek}</li>
+				                        <li>Kuchnia: #{r.kuchnia == 't' ? 'tak' : 'nie'}</li>
+				                        <li>Klimatyzacja: #{r.klimatyzacja == 't' ? 'tak' : 'nie'}</li>
+				                        <li>Telewizor: #{r.telewizor == 't' ? 'tak' : 'nie'}</li>
+				                    </ul>
+				                </div>
+				                <div class="right">
+				                    #{r.cenaZaDobe}zł/doba<br />
+				                    Ocena:<br />
+				                    <h:commandButton value="Zarezerwuj" action="#{roomList.reserveRoom(r)}" styleClass="button-20" />
+				                </div>
+				            </div>
+				        </div>
+				    </p:column>
+				</p:dataTable>
+	        </h:form>
+	        </div>    
+        	</div>
+	        	
+        </ui:insert>
+    </div>
+    
+    
+    <script>
+	 // Get the button
+	    let mybutton = document.getElementById("myBtn");
+	
+	    // When the user scrolls down 20px from the top of the document, show the button
+	    window.onscroll = function() {scrollFunction()};
+	
+	    function scrollFunction() {
+	      if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+	        mybutton.style.display = "block";
+	      } else {
+	        mybutton.style.display = "none";
+	      }
+	    }
+	
+	    // When the user clicks on the button, scroll to the top of the document
+	    function topFunction() {
+	      document.body.scrollTop = 0;
+	      document.documentElement.scrollTop = 0;
+	    }
+	</script>
+</body>
+</html>

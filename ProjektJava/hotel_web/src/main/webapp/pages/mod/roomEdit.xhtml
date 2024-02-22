@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/templates/main_template.xhtml">
+    <ui:define name="title">Edycja pokoju</ui:define>
+	
+	<ui:define name="content-top">
+		<div class="booking-form">
+			<h:form styleClass="pure-form pure-form-aligned">
+			    <fieldset>
+			        <legend>Edycja pokoju</legend>
+			        
+			        <!-- Typ pokoju -->
+			        <div class="pure-control-group">
+			           <h:selectOneMenu value="#{roomEdit.roomTypeId}">
+						    <f:selectItems value="#{roomEdit.roomTypes}" var="rt" itemValue="#{rt.idTypu}" itemLabel="#{rt.nazwa}"/>
+						</h:selectOneMenu>
+			        </div>
+			        
+			        <!-- Liczba osób -->
+			        <div class="pure-control-group">
+			            <h:outputLabel for="nr_people" value="Liczba osób"/>
+			            <h:inputText id="nr_people" value="#{roomEdit.room.liczbaOsob}" maxlength="5" placeholder="podaj liczbę"/>
+			        </div>
+			        
+			        <!-- Liczba łazienek -->
+			        <div class="pure-control-group">
+			            <h:outputLabel for="nr_bath" value="Liczba łazienek"/>
+			            <h:inputText id="nr_bath" value="#{roomEdit.room.liczbaLazienek}" maxlength="2" placeholder="ile..."/>
+			        </div>
+			        
+			        <!-- Koszt dobowy -->
+			        <div class="pure-control-group">
+			            <h:outputLabel for="price" value="Koszt dobowy"/>
+			            <h:inputText id="price" value="#{roomEdit.room.cenaZaDobe}" placeholder="do"/>
+			        </div>
+			        
+			        <!-- Kuchnia -->
+			        <div class="pure-control-group">
+			            <h:outputLabel for="kitchen" value="Kuchnia"/>
+			            <h:selectOneMenu id="kitchen" value="#{roomEdit.room.kuchnia}">
+			                <f:selectItem itemValue="t" itemLabel="tak"/>
+			                <f:selectItem itemValue="n" itemLabel="nie"/>
+			            </h:selectOneMenu>
+			        </div>
+			        
+			        <!-- Telewizor -->
+			        <div class="pure-control-group">
+			            <h:outputLabel for="tv" value="Telewizor"/>
+			            <h:selectOneMenu id="tv" value="#{roomEdit.room.telewizor}">
+			                <f:selectItem itemValue="t" itemLabel="tak"/>
+			                <f:selectItem itemValue="n" itemLabel="nie"/>
+			            </h:selectOneMenu>
+			        </div>
+			        
+			        <!-- Klimatyzacja -->
+			        <div class="pure-control-group">
+			            <h:outputLabel for="cooling" value="Klimatyzacja"/>
+			            <h:selectOneMenu id="cooling" value="#{roomEdit.room.klimatyzacja}">
+			                <f:selectItem itemValue="t" itemLabel="tak"/>
+			                <f:selectItem itemValue="n" itemLabel="nie"/>
+			            </h:selectOneMenu>
+			        </div>
+			        
+			        <!-- Przyciski -->
+			        <div class="pure-controls">
+			            <h:commandButton value="Zapisz" action="#{roomEdit.save}" styleClass="pure-button pure-button-primary"/>
+			            <h:button outcome="/pages/mod/modPage" value="Powrót" styleClass="pure-button button-secondary"/>
+			        </div>
+			    </fieldset>
+			</h:form>
+			
+		</div>
+	</ui:define>
+	
+	<ui:define name="content-bottom">
+	
+	</ui:define>
+</ui:composition>
+</html>
