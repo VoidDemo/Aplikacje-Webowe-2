@@ -216,6 +216,7 @@ form .infoBox{
   touch-action: manipulation;
   vertical-align: middle;
   white-space: nowrap;
+  margin: 0px 2px 0px 2px;
 }
 
 .button-3:focus:not(:focus-visible):not(.focus-visible) {

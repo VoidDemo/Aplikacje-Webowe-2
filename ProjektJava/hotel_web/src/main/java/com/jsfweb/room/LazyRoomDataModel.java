@@ -14,29 +14,30 @@ import java.util.Map;
 public class LazyRoomDataModel extends LazyDataModel<Pokoje> {
     private static final long serialVersionUID = 1L;
 
-    @EJB
+    private RoomList roomlist;	 
+    
     private RoomDAO roomDAO;
     private String sortOption;
 
-    public LazyRoomDataModel(RoomDAO roomDAO, String sortOption) {
+    public LazyRoomDataModel(RoomDAO roomDAO, String sortOption, RoomList roomlist) {
         this.roomDAO = roomDAO;
         this.sortOption = sortOption;
+        this.roomlist = roomlist;
+       
     }
 
     @Override
     public List<Pokoje> load(int first, int pageSize, Map<String, SortMeta> sortBy, Map<String, FilterMeta> filters) {
-    	String sortField = null;
-        String sortOrder = null; 
-
+        String sortOrder = sortOption; 
+        
         if (!sortBy.isEmpty()) {
-            // Przykład dla jednego pola sortowania
             Map.Entry<String, SortMeta> sortEntry = sortBy.entrySet().iterator().next();
-            sortField = sortEntry.getKey();
             sortOrder = sortEntry.getValue().getOrder() == SortOrder.ASCENDING ? "ASC" : "DESC";
         }
         
-        List<Pokoje> rooms = roomDAO.findRoomsPaginated(first, pageSize, sortField, sortOrder);
-        int rowCount = roomDAO.countFilteredRooms();
+        // Wywołanie metody findRoomsPaginated z ustalonym kierunkiem sortowania
+        List<Pokoje> rooms = roomDAO.findRoomsPaginated(first, pageSize, sortOrder,  roomlist.getTypPokoju(), roomlist.getLiczbaOsob(), roomlist.getKuchnia(), roomlist.getKlimatyzacja(), roomlist.getTelewizor());
+        int rowCount = roomDAO.countFilteredRooms( roomlist.getTypPokoju(), roomlist.getLiczbaOsob(), roomlist.getKuchnia(), roomlist.getKlimatyzacja(), roomlist.getTelewizor());
         this.setRowCount(rowCount);
         
         return rooms;
@@ -45,6 +46,6 @@ public class LazyRoomDataModel extends LazyDataModel<Pokoje> {
 
     @Override
     public int count(Map<String, FilterMeta> filters) {
-        return roomDAO.countFilteredRooms();
+        return roomDAO.countFilteredRooms(roomlist.getTypPokoju(), roomlist.getLiczbaOsob(), roomlist.getKuchnia(), roomlist.getKlimatyzacja(), roomlist.getTelewizor());
     }
 }

@@ -31,37 +31,55 @@
 				    Cena za dobe:
 				    <h:selectOneMenu value="#{roomList.selectedSortOption}">
 				        <f:selectItem itemValue="default" itemLabel="Wybierz..." />
-				        <f:selectItem itemValue="highest" itemLabel="Najwyższej" />
-				        <f:selectItem itemValue="lowest" itemLabel="Najniższej" />
+				        <f:selectItem itemValue="DESC" itemLabel="Najwyższej" />
+				        <f:selectItem itemValue="ASC" itemLabel="Najniższej" />
 				    </h:selectOneMenu>
 				</h:form>
 	            <hr />
 	            <h:form >
 	                <a class="little-box">Filtruj według:</a>
-	                <h:commandButton value="Potwierdź" styleClass="button-3"/>
+	                <h:commandButton value="Potwierdź" action="#{roomList.filterRooms}" update=":dataTableForm:room-table" styleClass="button-3"/>  
+	                <h:commandButton value="Resetuj filtry" action="#{roomList.resetFilters}" update=":dataTableForm:room-table" styleClass="button-3"/>
 	                <br />
 	                Typ pokoju:
-	               <h:selectOneMenu value="#{roomList.typPokojuId}">
-	               		<f:selectItem itemValue="null" itemLabel="Wybierz..." noSelectionOption="true"/>
-					    <f:selectItem itemValue="1" itemLabel="apartament" />
-					    <f:selectItem itemValue="2" itemLabel="kawalerka" />
-					    <f:selectItem itemValue="3" itemLabel="2-osobowy" />
-					    <f:selectItem itemValue="4" itemLabel="3-osobowy" />
-					    <f:selectItem itemValue="5" itemLabel="studio" />
-					    <f:selectItem itemValue="6" itemLabel="duplex" />
+	               <h:selectOneMenu value="#{roomList.typPokoju}">
+	               		<f:selectItem itemValue="#{null}" itemLabel="Wybierz..." noSelectionOption="true"/>
+					    <f:selectItem itemValue="apartament" itemLabel="apartament" />
+					    <f:selectItem itemValue="kawalerka" itemLabel="kawalerka" />
+					    <f:selectItem itemValue="2-osobwy" itemLabel="2-osobowy" />
+					    <f:selectItem itemValue="3-osobowy" itemLabel="3-osobowy" />
+					    <f:selectItem itemValue="studio" itemLabel="studio" />
+					    <f:selectItem itemValue="duplex" itemLabel="duplex" />
 					</h:selectOneMenu>
 					Liczba osób:
 					<h:selectOneMenu value="#{roomList.liczbaOsob}">
-						<f:selectItem itemValue="null" itemLabel="Wybierz..." noSelectionOption="true"/>
+						<f:selectItem itemValue="#{null}" itemLabel="Wybierz..." noSelectionOption="true"/>
 					    <f:selectItem itemValue="1" itemLabel="1" />
 					    <f:selectItem itemValue="2" itemLabel="2" />
 					    <f:selectItem itemValue="3" itemLabel="3" />
 					    <f:selectItem itemValue="4" itemLabel="4" /> 
 					</h:selectOneMenu>
 	                <br />
-	                Kuchnia <h:selectBooleanCheckbox value="#{roomList.kuchnia}" />
-	                Klimatyzacja <h:selectBooleanCheckbox value="#{roomList.klimatyzacja}" />
-	                Telewizor <h:selectBooleanCheckbox  value="#{roomList.telewizor}" />
+	                Kuchnia:
+					<h:selectOneMenu value="#{roomList.kuchnia}">
+					    <f:selectItem itemValue="#{null}" itemLabel="Wybierz..." noSelectionOption="true"/>
+					    <f:selectItem itemValue="t" itemLabel="Tak" />
+					    <f:selectItem itemValue="n" itemLabel="Nie" />
+					</h:selectOneMenu>
+					
+					Klimatyzacja:
+					<h:selectOneMenu value="#{roomList.klimatyzacja}">
+					    <f:selectItem itemValue="#{null}" itemLabel="Wybierz..." noSelectionOption="true"/>
+					    <f:selectItem itemValue="t" itemLabel="Tak" />
+					    <f:selectItem itemValue="n" itemLabel="Nie" />
+					</h:selectOneMenu>
+					
+					Telewizor:
+					<h:selectOneMenu value="#{roomList.telewizor}">
+					    <f:selectItem itemValue="#{null}" itemLabel="Wybierz..." noSelectionOption="true"/>
+					    <f:selectItem itemValue="t" itemLabel="Tak" />
+					    <f:selectItem itemValue="n" itemLabel="Nie" />
+					</h:selectOneMenu>
 	            </h:form>
 	        </div>
         
@@ -76,7 +94,7 @@
 	            <p:dataTable id="room-table" var="r" value="#{roomList.lazyModel}" lazy="true"
                  paginator="true" rows="10"
                  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-                 rowsPerPageTemplate="5,10,15"
+                 rowsPerPageTemplate="1,5,10"
                  paginatorPosition="top">
 			                 
 			        <p:ajax event="page" update="room-table" />

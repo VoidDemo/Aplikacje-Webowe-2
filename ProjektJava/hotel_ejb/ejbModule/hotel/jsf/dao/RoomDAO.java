@@ -3,6 +3,7 @@ package hotel.jsf.dao;
 
 import hotel.jsf.entity.Pokoje;
 import hotel.jsf.entity.Rezerwacje;
+import hotel.jsf.entity.TypPokoju;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -10,6 +11,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
@@ -58,19 +60,6 @@ public class RoomDAO {
         return list;
     }
     
-    public List<Pokoje> getSortedRooms(String sortCriteria) {
-        String queryStr = "SELECT p FROM Pokoje p";
-        if ("highest".equals(sortCriteria)) {
-            queryStr += " ORDER BY p.cenaZaDobe DESC";
-        } else if ("lowest".equals(sortCriteria)) {
-            queryStr += " ORDER BY p.cenaZaDobe ASC";
-        } // Domyślne sortowanie można dodać tutaj
-        
-        Query query = em.createQuery(queryStr);
-        return query.getResultList();
-    }
-    
-   
     
     public List<Pokoje> getRoomsByModeratorId(int userId) {
     	List<Pokoje> list = null;
@@ -80,14 +69,46 @@ public class RoomDAO {
         return list;
     }
     
-    public List<Pokoje> findRoomsPaginated(int first, int pageSize, String sortField, String sortOrder) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
+    public List<Pokoje> findRoomsPaginated(int first, int pageSize, String sortOrder, String typPokoju, Integer liczbaOsob, String kuchnia, String klimatyzacja, String telewizor) {
+    	CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Pokoje> cq = cb.createQuery(Pokoje.class);
         Root<Pokoje> root = cq.from(Pokoje.class);
+        
+        // Lista na predykaty filtrujące
+        List<Predicate> predicates = new ArrayList<>();
 
-     // Dodanie sortowania, jeśli zostało określone
-        if (sortField != null && sortOrder != null) {
-            Order order = sortOrder.equals("ASC") ? cb.asc(root.get(sortField)) : cb.desc(root.get(sortField));
+        // Dodawanie warunków filtrowania, jeśli są dostępne
+        if (typPokoju != null) {
+            Join<Pokoje, TypPokoju> typPokojuJoin = root.join("typPokoju");
+            predicates.add(cb.equal(typPokojuJoin.get("nazwa"), typPokoju));
+        }
+        if (liczbaOsob != null) {
+        	if(liczbaOsob==1) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 1));
+        	}else if(liczbaOsob==2) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 2));
+        	}else if(liczbaOsob==3) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 3));
+        	}else if(liczbaOsob==4) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 4));
+        	}
+        }
+        if (kuchnia != null) {
+            predicates.add(cb.equal(root.get("kuchnia"), kuchnia ));
+        }
+        if (klimatyzacja != null) {
+            predicates.add(cb.equal(root.get("klimatyzacja"), klimatyzacja ));
+        }
+        if (telewizor != null) {
+            predicates.add(cb.equal(root.get("telewizor"), telewizor ));
+        }
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        // Sortowanie po cenie za dobę
+        if (sortOrder != null) {
+            Path<Integer> cenaZaDobe = root.get("cenaZaDobe");
+            Order order = sortOrder.equals("ASC") ? cb.asc(cenaZaDobe) : cb.desc(cenaZaDobe);
             cq.orderBy(order);
         }
 
@@ -97,10 +118,42 @@ public class RoomDAO {
         return query.getResultList();
     }
 
-    public int countFilteredRooms() {
+    public int countFilteredRooms(String typPokoju, Integer liczbaOsob, String kuchnia, String klimatyzacja, String telewizor) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
         Root<Pokoje> root = query.from(Pokoje.class);
+        
+     // Lista na predykaty filtrujące
+        List<Predicate> predicates = new ArrayList<>();
+
+        // Dodawanie warunków filtrowania, jeśli są dostępne
+        if (typPokoju != null) {
+            Join<Pokoje, TypPokoju> typPokojuJoin = root.join("typPokoju");
+            predicates.add(cb.equal(typPokojuJoin.get("nazwa"), typPokoju));
+        }
+        if (liczbaOsob != null) {
+        	if(liczbaOsob==1) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 1));
+        	}else if(liczbaOsob==2) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 2));
+        	}else if(liczbaOsob==3) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 3));
+        	}else if(liczbaOsob==4) {
+        		predicates.add(cb.equal(root.get("liczbaOsob"), 4));
+        	}
+            
+        }
+        if (kuchnia != null) {
+            predicates.add(cb.equal(root.get("kuchnia"), kuchnia ));
+        }
+        if (klimatyzacja != null) {
+            predicates.add(cb.equal(root.get("klimatyzacja"), klimatyzacja ));
+        }
+        if (telewizor != null) {
+            predicates.add(cb.equal(root.get("telewizor"), telewizor ));
+        }
+
+        query.where(cb.and(predicates.toArray(new Predicate[0])));
         
         query.select(cb.count(root));
         return em.createQuery(query).getSingleResult().intValue();

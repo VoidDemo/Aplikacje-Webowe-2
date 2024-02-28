@@ -41,21 +41,20 @@ public class RoomList implements Serializable {
 	private static final String PAGE_BOOKING ="/pages/user/reservation?faces-redirect=true";
 	private List<Pokoje> rooms;
 	private List<Pokoje> roomsByModerator;
-	private String sortCriteria;
-	private Integer typPokojuId;
+	private String typPokoju;
     private Integer liczbaOsob;
-    private Boolean kuchnia;
-    private Boolean klimatyzacja;
-    private Boolean telewizor;
+    private String kuchnia;
+    private String klimatyzacja;
+    private String telewizor;
 	
     private LazyDataModel<Pokoje> lazyModel;
     
-    public Integer getTypPokojuId() {
-        return typPokojuId;
+    public String getTypPokoju() {
+        return typPokoju;
     }
 
-    public void setTypPokojuId(Integer typPokojuId) {
-        this.typPokojuId = typPokojuId;
+    public void setTypPokoju(String typPokoju) {
+        this.typPokoju = typPokoju;
     }
     
     public Integer getLiczbaOsob() {
@@ -66,27 +65,27 @@ public class RoomList implements Serializable {
 		this.liczbaOsob = liczbaOsob;
 	}
 	
-	public Boolean getKuchnia() {
+	public String getKuchnia() {
 		return kuchnia;
 	}
 
-	public void setKuchnia(Boolean kuchnia) {
+	public void setKuchnia(String kuchnia) {
 		this.kuchnia = kuchnia;
 	}
 
-	public Boolean getKlimatyzacja() {
+	public String getKlimatyzacja() {
 		return klimatyzacja;
 	}
 
-	public void setKlimatyzacja(Boolean klimatyzacja) {
+	public void setKlimatyzacja(String klimatyzacja) {
 		this.klimatyzacja = klimatyzacja;
 	}
 
-	public Boolean getTelewizor() {
+	public String getTelewizor() {
 		return telewizor;
 	}
 
-	public void setTelewizor(Boolean telewizor) {
+	public void setTelewizor(String telewizor) {
 		this.telewizor = telewizor;
 	}
     
@@ -106,7 +105,7 @@ public class RoomList implements Serializable {
 	public void init() {
 		getFullList();
 		getRoomsByModerator();
-		lazyModel = new LazyRoomDataModel(roomDAO,selectedSortOption);
+		lazyModel = new LazyRoomDataModel(roomDAO,selectedSortOption, this);
 	       
 	}
 	
@@ -118,17 +117,13 @@ public class RoomList implements Serializable {
 		 return rooms;
 	 }
 	
-		/*
-		 * public String getSortCriteria() { return sortCriteria; }
-		 * 
-		 * public void setSortCriteria(String sortCriteria) { this.sortCriteria =
-		 * sortCriteria; }
-		 * 
-		 * public void sortRooms() { rooms = roomDAO.getSortedRooms(sortCriteria); }
-		 */
 	    
 	 public void onConfirmSort() {
-	        lazyModel = new LazyRoomDataModel(roomDAO, selectedSortOption);
+	        lazyModel = new LazyRoomDataModel(roomDAO, selectedSortOption, this);
+	    }
+	 
+	 public void filterRooms() {
+	        lazyModel = new LazyRoomDataModel(roomDAO, selectedSortOption, this);
 	    }
 
 	 public List<Pokoje> getRoomsByModerator() {
@@ -167,7 +162,16 @@ public class RoomList implements Serializable {
 		    flash.put("room", room);
 		    return PAGE_EDIT;
 		}
-		
+	
+	 public String resetFilters() {
+	        this.typPokoju = null; 
+	        this.liczbaOsob = null; 
+	        this.kuchnia = null; 
+	        this.klimatyzacja = null; 
+	        this.telewizor = null; 
+
+	        return null; 
+	    }
 		
 	 public LazyDataModel<Pokoje> getLazyModel() { 
 		 return lazyModel; 
